@@ -1,6 +1,5 @@
 package fr.epita.quiz;
 
-import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -17,6 +16,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.ResourceBundle;
+
 public class QuizController implements Initializable {
     public TextArea questionTextArea;
     public CheckBox firstCheckBox;
@@ -28,78 +28,129 @@ public class QuizController implements Initializable {
     public TableColumn<Score, String> scoreColumn;
     public Label labelQuestionNumber;
     public Button nextQuestionBtn;
-
     Connection connection = DBConnection.getConnector();
     Statement statement;
     ResultSet resultSet;
-    public ObservableList<Quiz> quizObservableList;
-    int x = 0;
     ArrayList<String> questionNumberList = new ArrayList<>();
     ArrayList<String> questionList = new ArrayList<>();
     ArrayList<String> answerList = new ArrayList<>();
-    ArrayList<String> answerOption1list = new ArrayList<>();
-    ArrayList<String> answerOption2list = new ArrayList<>();
-    ArrayList<String> answerOption3list = new ArrayList<>();
+    ArrayList<String> answerOption1List = new ArrayList<>();
+    ArrayList<String> answerOption2List = new ArrayList<>();
+    ArrayList<String> answerOption3List = new ArrayList<>();
+    int x = 0;
+
+   ArrayList<String> optionList = new ArrayList<>();
     public void  fetchQuestion() {
+
         try {
             statement = connection.createStatement();
             resultSet = statement.executeQuery("Select * from question");
-
             while (resultSet.next()) {
-                //resultSet.getString("sn")+ " " +
-                String questionNumber = resultSet.getString("qn");
-                String question = resultSet.getString("question");
-                String answer = resultSet.getString("answer");
-                String answerOption1 = resultSet.getString("answerOption1");
-                String answerOption2 = resultSet.getString("answerOption2");
-                String answerOption3 = resultSet.getString("answerOption3");
-                // Below values are add in the Arraylist with corresponding above defined ArrayList
-                questionNumberList.add(String.valueOf(questionNumber));
-                questionList.add(question);
-                answerList.add(answer);
-                answerOption1list.add(answerOption1);
-                answerOption2list.add(answerOption2);
-                answerOption3list.add(answerOption3);
+                questionNumberList.add(resultSet.getString("qn"));
+                questionList.add(resultSet.getString("question"));
+                answerList.add(resultSet.getString("answer"));
+                answerOption1List.add(resultSet.getString("answerOption1"));
+                answerOption2List.add(resultSet.getString("answerOption2"));
+                answerOption3List.add(resultSet.getString("answerOption3"));
             }
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        // From here value of the CheckBox generate  randomly which set random value in Checkbox
         ArrayList<String> setCheckboxRandom = new ArrayList<>();
         setCheckboxRandom.add(answerList.get(x));
-        setCheckboxRandom.add(answerOption1list.get(x));
-        setCheckboxRandom.add(answerOption2list.get(x));
-        setCheckboxRandom.add(answerOption3list.get(x));
-
+        setCheckboxRandom.add(answerOption1List.get(x));
+        setCheckboxRandom.add(answerOption2List.get(x));
+        setCheckboxRandom.add(answerOption3List.get(x));
+        // From here value of the CheckBox generate  randomly which set random value in Checkbox
         int []indic = new int[setCheckboxRandom.size()];
         Random rnd = new Random();
-
         for(int i=0; i<indic.length; i++){
             int j = rnd.nextInt(i+1);
             indic[i] = indic[j];
             indic[j] = i;
         }
-        ArrayList listSet = new ArrayList<>();
+        ArrayList<Object> listSet = new ArrayList<>();
         for (int i : indic) {
             listSet.add(setCheckboxRandom.get(i));
         }
         // From here End the set of the Random value in CheckBox
-                    labelQuestionNumber.setText("Qn : " + questionNumberList.get(x) + " ");
-                    questionTextArea.setText(questionList.get(x));
-                    firstCheckBox.setText(listSet.get(0).toString());
-                    secondCheckBox.setText(listSet.get(1).toString());
-                    thirdCheckBox.setText(listSet.get(2).toString());
-                    forthCheckBox.setText(listSet.get(3).toString());
+        ArrayList<String> checkBoxOption = new ArrayList<>();
+        String first = listSet.get(0).toString();
+        String second = listSet.get(1).toString();
+        String third = listSet.get(2).toString();
+        String fourth = listSet.get(3).toString();
+        optionList.clear();
+
+        optionList.add(first);
+        optionList.add(second);
+        optionList.add(third);
+        optionList.add(fourth);
+
+
+        checkBoxOption.add(first);
+        checkBoxOption.add(second);
+        checkBoxOption.add(third);
+        checkBoxOption.add(fourth);
+
+        questionTextArea.setText(questionList.get(x));
+        labelQuestionNumber.setText("Qn : " + questionNumberList.get(x) + " ");
+        firstCheckBox.setText(listSet.get(0).toString());
+        secondCheckBox.setText(listSet.get(1).toString());
+        thirdCheckBox.setText(listSet.get(2).toString());
+        forthCheckBox.setText(listSet.get(3).toString());
         ++x;
 
+        
     }
     public void onSubmitBtn() {
+        int count = 0;
+        if(firstCheckBox.isSelected())
+        {
+            ++ count;
+        }
+        if (secondCheckBox.isSelected()){
+            ++ count;
+        }
+        if (thirdCheckBox.isSelected()){
+            ++ count;
+        }
+        if (forthCheckBox.isSelected()){
+            ++ count;
+        }
+
+        int score = 0;
+        if(count == 1){
+            if(firstCheckBox.isSelected()){
+                if(optionList.get(0).equals(answerList.get(x))){
+                    score ++;
+                    System.out.println(score);
+                }
+            }
+            if(secondCheckBox.isSelected()) {
+                if (optionList.get(1).equals(answerList.get(x))) {
+                    score ++;
+                    System.out.println(score);
+                }
+            }
+            if(thirdCheckBox.isSelected()) {
+                if (optionList.get(2).equals(answerList.get(x))) {
+                    score ++;
+                    System.out.println(score);
+                }
+            }
+            if(forthCheckBox.isSelected()) {
+                if (optionList.get(3).equals(answerList.get(x))) {
+                    score ++;
+                    System.out.println(score);
+                }
+            }
+
+        }
+
 
     }
     public void onNextQuestionBtn() {
-
-
+       fetchQuestion();
     }
     public void onQuitBtn() {
         System.exit(0);
@@ -117,6 +168,10 @@ public class QuizController implements Initializable {
     }
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+            
+    }
+
+    public void onTableView(SortEvent<TableView<Score>> tableViewSortEvent) {
 
     }
 }
